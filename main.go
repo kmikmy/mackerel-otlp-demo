@@ -19,14 +19,14 @@ import (
 )
 
 func initTracerProvider(ctx context.Context) (*sdktrace.TracerProvider, error) {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "localhost:4318"
+	}
 	// (a) トレースを送信するクライアントの初期化
 	client := otlptracehttp.NewClient(
-		otlptracehttp.WithEndpoint("otlp-vaxila.mackerelio.com"),
-		otlptracehttp.WithHeaders(map[string]string{
-			"Accept":           "*/*",
-			"Mackerel-Api-Key": os.Getenv("MACKEREL_APIKEY"),
-		}),
-		otlptracehttp.WithCompression(otlptracehttp.GzipCompression),
+		otlptracehttp.WithEndpoint(endpoint),
+		otlptracehttp.WithInsecure(),
 	)
 	// (b) トレースエクスポーターの初期化
 	exporter, err := otlptrace.New(ctx, client)
